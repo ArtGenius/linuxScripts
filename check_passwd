@@ -1,0 +1,34 @@
+#!/usr/bin/python
+import os, stat
+
+passwd = '/etc/passwd'
+def searchUser(user):
+	return searchUserParam(0, user)
+
+def searchGroupId(groupId):
+	return searchUserParam(3, groupId)
+
+def searchUserParam(paramNumber, param):
+	fo = open(passwd, 'r')
+	usersList = fo.read().split('\n')
+	fo.close()
+	for u in usersList:
+		try:
+			if u.split(':')[paramNumber] == param:
+				return True
+		except IndexError:
+			return False	
+	return False
+	
+def checkPasswdFilePermissions():
+	if os.access(passwd, os.R_OK):
+		print('user can read file '+ passwd)
+	else:
+		print('user can not read file ' + passwd)	
+	if os.access(passwd, os.W_OK):
+		print('user can write file ' + passwd)
+	else:
+		print('user can not write file ' + passwd)		
+print(searchUser('akakayev'))
+print(searchGroupId('1000'))
+checkPasswdFilePermissions()
