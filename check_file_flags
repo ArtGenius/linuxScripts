@@ -1,0 +1,38 @@
+#!/usr/bin/python
+import os, sys
+import stat
+import shutil
+
+def rememberFilesWithSFlags():
+	fo = open('./files', 'w')
+	for dirName, subdirList, fileList in os.walk(sys.argv[1]):
+		for fname in fileList:
+			filePath = dirName + '/' + fname
+			if os.path.isfile(filePath):
+				gidSet = bool(os.stat(filePath).st_mode & stat.S_ISGID)
+				uidSet = bool(os.stat(filePath).st_mode & stat.S_ISUID)
+				if gidSet or uidSet:
+					fo.write(filePath + ' uidSet=' + str(uidSet) + ' gidSet=' + str(gidSet) + '\n')
+	fo.close()
+def loadOldFiles():
+	fo = open('./files', 'r')
+	oldFiles = map((lambda line:line.split(' ')[0]), fo.read().split('\n'))
+	fo.close()
+	return oldFiles
+def searchFilesWithSFlags():
+	oldFiles = loadOldFiles()
+	fo = open('./files', 'w')
+	for dirName, subdirList, fileList in os.walk(sys.argv[1]):
+		for fname in fileList:
+			filePath = dirName + '/' + fname
+			if os.path.isfile(filePath):
+				gidSet = bool(os.stat(filePath).st_mode & stat.S_ISGID)
+				uidSet = bool(os.stat(filePath).st_mode & stat.S_ISUID)
+				if gidSet or uidSet:
+					if filePath not in oldFiles:
+						print(filePath + ' uidSet=' + str(uidSet) + ' gidSet=' + str(gidSet))
+					fo.write(filePath + ' uidSet=' + str(uidSet) + ' gidSet=' + str(gidSet) + '\n')
+	fo.close()
+if not os.path.exists('./files'):
+	rememberFilesWithSFlags()
+searchFilesWithSFlags()
